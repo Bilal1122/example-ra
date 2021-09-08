@@ -1,6 +1,7 @@
 class Api::V1::SessionsController < Api::V1::ApiController
   skip_before_action :verify_authenticity_token
   protect_from_forgery with: :null_session
+  skip_before_action :authenticate
 
   def create
     user = User.find_by_email(params[:email])

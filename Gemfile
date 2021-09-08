@@ -36,6 +36,9 @@ gem 'simple_token_authentication', '~> 1.0'
 gem 'pry'
 gem 'pry-rails'
 
+# Utilities
+gem 'enumerize'
+
 # email
 gem "letter_opener", group: :development
 

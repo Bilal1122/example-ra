@@ -10,10 +10,42 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_04_102811) do
+ActiveRecord::Schema.define(version: 2021_09_08_131221) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "org_event_logs", force: :cascade do |t|
+    t.integer "organisation_id"
+    t.string "title"
+    t.text "description"
+    t.string "attachment"
+    t.text "data"
+    t.integer "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "organisations", force: :cascade do |t|
+    t.string "name"
+    t.string "phone_no"
+    t.string "email"
+    t.text "help_desk_info"
+    t.string "customer_contact"
+    t.text "additional_info"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "active", default: false
+  end
+
+  create_table "tasks", force: :cascade do |t|
+    t.string "title"
+    t.text "description"
+    t.string "task_type"
+    t.integer "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "user_organisations", force: :cascade do |t|
     t.integer "user_id"

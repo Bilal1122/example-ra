@@ -1,0 +1,2 @@
+class OrgEventLog < ApplicationRecord
+end
