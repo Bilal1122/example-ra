@@ -4,11 +4,28 @@ class Api::V1::UsersController < Api::V1::ApiController
 
   def index
     response = @current_user.as_json(
-      only: [:firstname, :lastname, :email, :authentication_token],
+      only: [:firstname, :lastname, :email],
+      include: [role_info: {only: [:is_admin, :is_consultant]}]
+    )
+    json_success("Fetched.", response);
+  end
+
+  def get_list
+    response = User.where.not(id: @current_user.id).as_json(
+      only: [:id, :firstname, :lastname, :email],
+      include: [role_info: {only: [:is_admin, :is_consultant]}]
+    )
+    json_success("Fetched.", response);
+  end
+
+  def show
+    user = User.find_by(id: params[:id])
+    response = user.as_json(
+      only: [:firstname, :lastname, :email],
       include: [
         role_info: {only: [:is_admin, :is_consultant]},
-        organisations: {}
-      ]
+        organisations: {only: [:id, :name]}
+      ],
     )
     json_success("Fetched.", response);
   end
@@ -21,7 +38,7 @@ class Api::V1::UsersController < Api::V1::ApiController
     user.password_confirmation = temp_password
     user.created_by_id = @current_user.id
     if user.save
-      user.create_role_info(is_admin: params['is_admin'], is_consultant: params['is_admin'])
+      user.create_role_info(is_admin: params['is_admin'], is_consultant: params['is_consultant'])
       if organisation_ids
         organisation_ids.each do |org_id|
           create_event_log(user, org_id)
@@ -39,11 +56,14 @@ class Api::V1::UsersController < Api::V1::ApiController
     if user
       user_role = user.role_info
       if user.update(user_params)
-        user_role.is_admin = params['is_admin'] if params['is_admin'].present?
-        user_role.is_consultant = params['is_consultant'] if params['is_consultant'].present?
+        user_role.is_admin = params['is_admin']
+        user_role.is_consultant = params['is_consultant']
         user_role.save
         organisation_ids = params['organisations']
-        if organisation_ids
+        if !user_role.is_consultant
+          user.user_organisations.delete_all
+        end
+        if organisation_ids && user_role.is_consultant
           organisation_ids.each do |org_id|
             create_event_log(user, org_id)
             user.user_organisations.create(organisation_id: org_id)

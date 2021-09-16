@@ -36,11 +36,17 @@ gem 'simple_token_authentication', '~> 1.0'
 gem 'pry'
 gem 'pry-rails'
 
+# cors
+gem 'rack-cors', '~> 0.3.1'
+
 # Utilities
 gem 'enumerize'
 
 # email
 gem "letter_opener", group: :development
+
+# attachments
+gem "paperclip", "~> 6.0.0"
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development

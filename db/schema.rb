@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_08_131221) do
+ActiveRecord::Schema.define(version: 2021_09_16_113747) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,18 @@ ActiveRecord::Schema.define(version: 2021_09_08_131221) do
     t.string "attachment"
     t.text "data"
     t.integer "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "task_id"
+    t.integer "organisation_task_id"
+  end
+
+  create_table "organisation_tasks", force: :cascade do |t|
+    t.integer "organisation_id"
+    t.integer "task_id"
+    t.date "start_at"
+    t.date "end_at"
+    t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -36,6 +48,15 @@ ActiveRecord::Schema.define(version: 2021_09_08_131221) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "active", default: false
+    t.integer "created_by_id"
+    t.string "os"
+    t.string "cpu"
+    t.string "ram"
+    t.string "disk"
+    t.string "logical_processors"
+    t.string "cores"
+    t.string "stack_name"
+    t.string "topology"
   end
 
   create_table "tasks", force: :cascade do |t|

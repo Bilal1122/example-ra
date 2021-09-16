@@ -1,6 +1,8 @@
 class Api::V1::ApiController < ApplicationController
   acts_as_token_authentication_handler_for User, fallback: :none
   before_action :authenticate
+  skip_before_action :verify_authenticity_token
+  protect_from_forgery with: :null_session
 
   def json_success(info, data = {})
     render status: 200,
