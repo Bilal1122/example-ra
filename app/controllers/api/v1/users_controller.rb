@@ -4,15 +4,15 @@ class Api::V1::UsersController < Api::V1::ApiController
 
   def index
     response = @current_user.as_json(
-      only: [:firstname, :lastname, :email],
+      only: [:id, :firstname, :lastname, :email],
       include: [role_info: {only: [:is_admin, :is_consultant]}]
     )
     json_success("Fetched.", response);
   end
 
   def get_list
-    response = User.where.not(id: @current_user.id).as_json(
-      only: [:id, :firstname, :lastname, :email],
+    response = User.all.as_json(
+      only: [:id, :firstname, :lastname, :email, :blocked],
       include: [role_info: {only: [:is_admin, :is_consultant]}]
     )
     json_success("Fetched.", response);
@@ -45,6 +45,7 @@ class Api::V1::UsersController < Api::V1::ApiController
           user.user_organisations.create(organisation_id: org_id)
         end
       end
+      UserMailer.account_setup_mail(user, temp_password).deliver_later
       json_success("User created successfully.");
     else
       json_bad_request(user.errors.full_messages.to_sentence)
@@ -54,10 +55,21 @@ class Api::V1::UsersController < Api::V1::ApiController
   def update
     user = User.find_by(id: params[:id])
     if user
+      if params[:oldPassword].present? && !user.valid_password?(params[:oldPassword])
+        json_bad_request("Wrong old password.")
+        return false
+      end
+      
+      if params[:password] && params[:passwordConfirmation]
+        user.password = params[:password]
+        user.password_confirmation = params[:passwordConfirmation]
+      end
+
       user_role = user.role_info
       if user.update(user_params)
-        user_role.is_admin = params['is_admin']
-        user_role.is_consultant = params['is_consultant']
+        # binding.pry
+        user_role.is_admin = params['is_admin'] if !params['is_admin'].nil?
+        user_role.is_consultant = params['is_consultant'] if !params['is_consultant'].nil?
         user_role.save
         organisation_ids = params['organisations']
         if !user_role.is_consultant
@@ -69,12 +81,15 @@ class Api::V1::UsersController < Api::V1::ApiController
             user.user_organisations.create(organisation_id: org_id)
           end
         end
+        user.user_organisations.where(organisation_id: params['toRemoveOrganisations']).delete_all
         organisation_ids_to_delete = params['delete_organisations']
         user.user_organisations.where(organisation_id: params['delete_organisations']).delete_all
+
         json_success("User updated successfully.");
       else
         json_bad_request("Something wend wrong")
       end
+
     else
       json_bad_request("User not found")
     end
@@ -103,12 +118,31 @@ class Api::V1::UsersController < Api::V1::ApiController
           only: [:firstname, :lastname, :email, :authentication_token],
           include: [role_info: {only: [:is_admin, :is_consultant]}]
         )
-        json_success("Password reset successfully", response);
+        json_success("Password reset successfully.", response);
       else
         json_bad_request(user.errors.full_messages.to_sentence)
       end
     else
       json_unauthorized("Reset token expired")
+    end
+  end
+
+  def confirm_account
+    user = User.find_by_email(params[:email])
+    if user
+      if user.valid_password?(params[:temp_password])
+        user.password = params[:password]
+        user.password_confirmation = params[:password_confirmation]
+        if user.save
+          json_success("Account updated successfully.", response);
+        else
+          json_bad_request(user.errors.full_messages.to_sentence)
+        end
+      else
+        json_unauthorized("Wrong or expired temporary password.")
+      end
+    else
+      json_unauthorized("User not found.")
     end
   end
 

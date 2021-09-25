@@ -48,6 +48,9 @@ gem "letter_opener", group: :development
 # attachments
 gem "paperclip", "~> 6.0.0"
 
+# html style
+gem 'slim'
+
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
@@ -66,6 +69,12 @@ group :development do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
+  # cap
+  gem 'capistrano', '~> 3.11'
+  gem 'capistrano-rails', '~> 1.4'
+  gem 'capistrano-passenger', '~> 0.2.0'
+  gem 'capistrano-rbenv', '~> 2.1', '>= 2.1.4'
+  gem 'capistrano-db-tasks', require: false
 end
 
 group :test do

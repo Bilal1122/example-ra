@@ -3,6 +3,7 @@ class OrganisationTask < ApplicationRecord
 
   belongs_to :organisation
   belongs_to :task
+  has_one :org_event_log
 
   def task_info
     task = self.task
@@ -14,11 +15,26 @@ class OrganisationTask < ApplicationRecord
     }
   end
 
+  def log_event
+    log = self.org_event_log
+    return false if log.blank?
+    return {
+      id: log.id,
+      title: log.title,
+      description: log.description,
+      attachment: log.attachment,
+      data: JSON.parse(log.data),
+      created_at: log.created_at,
+      task_id: log.task_id
+    }
+  end
+
   def task_status
     start_at = self.start_at
     end_at = self.end_at
     task_type = self.task.task_type
     date_now = Date.current
+    return "completed" if self.status === "completed"
     case task_type
     when "once"
       "open"
@@ -29,7 +45,8 @@ class OrganisationTask < ApplicationRecord
         "open"
       end
     when "weekly", "by_weekly", "monthly"
-      if date_now > (end_at - 2.days)
+      # "ending_soon"
+      if date_now > (end_at - 3.days)
         "ending_soon"
       else 
         "open"

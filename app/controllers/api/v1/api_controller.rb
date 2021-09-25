@@ -32,9 +32,9 @@ class Api::V1::ApiController < ApplicationController
   private
   def authenticate
     authenticate_or_request_with_http_token do |token, options|
-      @current_user = User.find_by(authentication_token: token)
-      if @current_user.present?
-        return @current_user
+      current_user = User.find_by(authentication_token: token)
+      if current_user.present?
+        @current_user = current_user
       else
         json_forbidden("Auth token invalid, please relogin")
       end

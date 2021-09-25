@@ -1,0 +1,18 @@
+b New Customer Assigned!
+br
+br
+b Customer Name: 
+| #{@organisation.name}
+br
+b Assigned By: 
+| #{@assigned_by.full_name}
+br
+br
+b Task Details:
+br
+ol
+  - @tasks.each do |task|
+    li
+      | <b> #{task.task_type}</b> - #{task.title} - #{task.description}
+
+= link_to 'View Customer ', "http://localhost:3001/organisations/#{@organisation.id}/edit", target: :_blank

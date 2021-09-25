@@ -3,7 +3,7 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+         :recoverable, :rememberable, :validatable, :trackable, :timeoutable
 
   has_one :role_info, class_name: 'UserRoleInfo', foreign_key: 'user_id'
   has_many :user_organisations
@@ -17,6 +17,14 @@ class User < ApplicationRecord
 
   def full_name
     return "#{firstname} #{lastname}"
+  end
+
+  def is_admin
+    self.role_info.is_admin
+  end
+
+  def is_consultant
+    self.role_info.is_consultant
   end
 
 end

@@ -1,6 +1,7 @@
 class Task < ApplicationRecord
 
   has_many :organisation_tasks
+  has_many :org_event_logs
 
   extend Enumerize
   enumerize :task_type, in: [:once, :daily, :weekly, :by_weekly, :monthly]

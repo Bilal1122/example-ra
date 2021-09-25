@@ -1,11 +1,12 @@
 Rails.application.routes.draw do
-  # devise_for :users
+  devise_for :users
   namespace :api do
     namespace :v1 do
       resources :sessions, only: [:create, :destroy]
       resources :users, only: [:index, :create, :update, :show] do
         post :forgot_password, on: :collection
         post :reset_password, on: :collection
+        post :confirm_account, on: :collection
         get :get_list, on: :collection
       end
       resources :organisations, only: [:index, :create, :update, :show] do

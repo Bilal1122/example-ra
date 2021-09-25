@@ -1,0 +1,11 @@
+b You have been invited to join RA as a #{@role_type}!
+br
+br
+b Temporary Password: 
+|#{@temporary_password}
+br
+br
+= link_to 'Setup your account', "http://localhost:3001/account_confirmation?user_email=#{@user.email}", target: :_blank
+br
+br
+|*Use the above temporary password to setup your new password.
