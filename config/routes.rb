@@ -2,7 +2,9 @@ Rails.application.routes.draw do
   devise_for :users
   namespace :api do
     namespace :v1 do
-      resources :sessions, only: [:create, :destroy]
+      resources :sessions, only: [:create, :destroy] do
+        post :log_out, on: :collection
+      end
       resources :users, only: [:index, :create, :update, :show] do
         post :forgot_password, on: :collection
         post :reset_password, on: :collection

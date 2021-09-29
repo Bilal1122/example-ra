@@ -11,8 +11,8 @@ class Api::V1::UsersController < Api::V1::ApiController
   end
 
   def get_list
-    response = User.all.as_json(
-      only: [:id, :firstname, :lastname, :email, :blocked],
+    response = User.order(created_at: :asc).as_json(
+      only: [:id, :firstname, :lastname, :email, :blocked, :sign_in_count, :last_sign_in_at],
       include: [role_info: {only: [:is_admin, :is_consultant]}]
     )
     json_success("Fetched.", response);
@@ -24,7 +24,8 @@ class Api::V1::UsersController < Api::V1::ApiController
       only: [:firstname, :lastname, :email],
       include: [
         role_info: {only: [:is_admin, :is_consultant]},
-        organisations: {only: [:id, :name]}
+        organisations: {only: [:id, :name]},
+        user_trackers: {only: [:ip_address, :created_at]}
       ],
     )
     json_success("Fetched.", response);
@@ -67,7 +68,9 @@ class Api::V1::UsersController < Api::V1::ApiController
 
       user_role = user.role_info
       if user.update(user_params)
-        # binding.pry
+        if user_params[:blocked] == false
+          user.update(failed_attempts: 0)
+        end
         user_role.is_admin = params['is_admin'] if !params['is_admin'].nil?
         user_role.is_consultant = params['is_consultant'] if !params['is_consultant'].nil?
         user_role.save
@@ -98,8 +101,12 @@ class Api::V1::UsersController < Api::V1::ApiController
   def forgot_password
     user = User.find_by_email(params[:email])
     if user.present?
-      user.send_reset_password_instructions
-      json_success("Password reset email sent!");
+      if !user.blocked?
+        user.send_reset_password_instructions
+        json_success("Password reset email sent!");
+      else
+        json_bad_request("User with email '#{user.email}' is blocked.");
+      end
     else
       json_not_found("Email not found")
     end

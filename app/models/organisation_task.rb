@@ -39,14 +39,17 @@ class OrganisationTask < ApplicationRecord
     when "once"
       "open"
     when "daily"
-      if Time.now > (end_at.to_time.end_of_day - 3.hours)
+      if Time.now > (end_at.end_of_day - 3.hours)
+        "ending"
+      elsif Time.now > (end_at.end_of_day - 5.hours)
         "ending_soon"
       else
         "open"
       end
     when "weekly", "by_weekly", "monthly"
-      # "ending_soon"
-      if date_now > (end_at - 3.days)
+      if date_now >= end_at.to_date
+        "ending"
+      elsif date_now > (end_at - 3.days)
         "ending_soon"
       else 
         "open"
@@ -63,16 +66,17 @@ class OrganisationTask < ApplicationRecord
       self.start_at = Date.current
     when "daily"
       self.start_at = Date.current
-      self.end_at = Date.current
+      self.end_at = Date.current.end_of_day
     when "weekly"
-      self.start_at = Date.current
-      self.end_at = Date.current + 1.week
+      next_week_start = (Date.current + 1.week).beginning_of_week
+      self.start_at = next_week_start
+      self.end_at = next_week_start.end_of_week(:friday)
     when "by_weekly"
       self.start_at = Date.current
-      self.end_at = Date.current + 2.week
+      self.end_at = Date.current + 2.week > Date.current.end_of_month ? Date.current.end_of_month : (Date.current + 2.week).end_of_week(:friday)
     when "monthly"
       self.start_at = Date.current
-      self.end_at = Date.current + 1.month
+      self.end_at = Date.current.end_of_month(:friday)
     else
     end
   end

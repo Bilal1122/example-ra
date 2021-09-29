@@ -4,7 +4,7 @@ class Organisation < ApplicationRecord
   has_many :consultants, through: :user_organisations, source: :user
   has_many :organisation_tasks
   has_many :tasks, through: :organisation_tasks, source: :task
-  has_many :org_event_logs
+  has_many :org_event_logs, -> { order('created_at DESC') }
   has_one  :admin, class_name: 'User', foreign_key: :created_by_id
 
   # scope :admin, -> { User.find_by(id: self.created_by_id) }

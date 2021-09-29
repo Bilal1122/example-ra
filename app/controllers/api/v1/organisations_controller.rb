@@ -79,7 +79,6 @@ class Api::V1::OrganisationsController < Api::V1::ApiController
 
         user_orgs = organisation.user_organisations.where.not(user_id: nil).order(order: :asc)
         if params[:consultants]
-          binding.pry
           first_id = params[:consultants][0]
           second_id = params[:consultants][1]
           if user_orgs.first && first_id && user_orgs.first.user_id != first_id
@@ -88,17 +87,17 @@ class Api::V1::OrganisationsController < Api::V1::ApiController
             # update user
             user_orgs.first.update_attributes(user_id: first_id)
             # add user
-            create_event_log(user_orgs.first.user, organisation, false)
+            create_event_log(user_orgs.first.user, organisation)
             # mail
             TaskMailer.send_mail(user_orgs.first.user, organisation, @current_user).deliver_later
           end
           if user_orgs.second && second_id && user_orgs.second.user_id != second_id
             # removed user
-            # create_event_log(user_orgs.second.user, organisation, false)
+            create_event_log(user_orgs.second.user, organisation, false)
             # update user
             user_orgs.second.update_attributes(user_id: second_id)
             # add user
-            create_event_log(user_orgs.second.user, organisation, false)
+            create_event_log(user_orgs.second.user, organisation)
             # mail
             TaskMailer.send_mail(user_orgs.second.user, organisation, @current_user).deliver_later
           end
